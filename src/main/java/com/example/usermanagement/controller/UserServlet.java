@@ -5,20 +5,26 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
 
+import com.example.usermanagement.dao.IUserDAO;
 import com.example.usermanagement.dao.UserDAO;
 import com.example.usermanagement.model.User;
 
-
+@WebServlet("/users")
 public class UserServlet extends HttpServlet {
-    private UserDAO userDAO;
 
-    @Override
-    public void init() {
-        userDAO = new UserDAO();
+    private IUserDAO userDAO;
+
+    public UserServlet() {
+        // Utilisé en production
+        this.userDAO = new UserDAO();
+    }
+
+    // ✅ Pour les tests unitaires
+    public UserServlet(IUserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
     @Override
@@ -37,14 +43,15 @@ public class UserServlet extends HttpServlet {
         String phone = req.getParameter("phone");
         String dateNaissance = req.getParameter("dateNaissance");
 
-        // Conversion de la date
         LocalDate naissance = LocalDate.parse(dateNaissance);
-
-        // Création de l'objet User
         User user = new User(0, name, email, phone, naissance);
         userDAO.add(user);
 
-        // Redirection vers /users
         resp.sendRedirect("users");
+    }
+
+    // Optionnel pour test ou debug
+    public IUserDAO getUserDAO() {
+        return userDAO;
     }
 }
